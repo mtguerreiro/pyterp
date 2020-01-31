@@ -23,6 +23,8 @@ def linear(x, xq, y):
         Interpolated values.
         
     """
+    if y.ndim == 1:
+        y = y.reshape(-1, 1)
     
     # Data dimension
     n = y.shape[0]
@@ -49,5 +51,8 @@ def linear(x, xq, y):
         # Interpolation
         yq[:, j] = y[x_idx, j] + m * (xq[:, j] - x[x_idx])
         yq[~idx] = 0
+
+    if yq.shape[1] == 1:
+        yq = yq.reshape(-1)
 
     return yq
