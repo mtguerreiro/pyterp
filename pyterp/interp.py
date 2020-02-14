@@ -36,7 +36,13 @@ def linear(x, xq, y):
     # Sampling interval
     dx = x[1] - x[0]
 
-    yq = np.zeros(xq.shape, dtype=y.dtype)
+    # The type of the output array will be either float or complex. It cannot
+    # be the same type as `y`, since `y` may be of the int type.
+    if np.iscomplexobj(y) is True:
+        yq_dtype = y.dtype
+    else:
+        yq_dtype = float
+    yq = np.zeros(xq.shape, dtype=yq_dtype)
 
     for j in range(y.shape[1]):
 
