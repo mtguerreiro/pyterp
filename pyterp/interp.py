@@ -159,7 +159,7 @@ def sinc_numba(x, xq, y, yq_dtype):
     yq = np.zeros(xq.shape[0], dtype=yq_dtype)
     
     for n in numba.prange(xq.shape[0]):
-        o = np.sinc( (xq[n] - x) / dx )
+        o = np.sinc( (xq[n] - x) / dx ).astype(yq_dtype)
         yq[n] = np.dot(y, o)
 
     return yq
