@@ -1,4 +1,5 @@
 import numpy as np
+import numba
 
 
 def linear(x, xq, y):
@@ -108,9 +109,8 @@ def sinc(x, xq, y):
     yq = np.zeros(xq.shape, dtype=yq_dtype)
     
     for j in range(y.shape[1]):
-        for n, xqn in enumerate(xq[:, j]):
-            #yq[n, j] = np.sum(y[:, j] * kernel(xqn - x, kind=kernel))
-            yq[n, j] = np.dot(y[:, j], kernel(xqn - x, kind='sinc'))
+        yc = np.ascontiguousarray(y[:, j])
+        yq[:, j] = sinc_numba(x, xq[:, j], yc, yq.dtype)
 
     if yq.shape[1] == 1:
         yq = yq.reshape(-1)
@@ -150,3 +150,16 @@ def kernel(x, kind='linear'):
         o[:] = np.sinc(x / dx)
 
     return o
+
+
+@numba.njit(parallel=True)
+def sinc_numba(x, xq, y, yq_dtype):
+
+    dx = x[1] - x[0]
+    yq = np.zeros(xq.shape[0], dtype=yq_dtype)
+    
+    for n in numba.prange(xq.shape[0]):
+        o = np.sinc( (xq[n] - x) / dx )
+        yq[n] = np.dot(y, o)
+
+    return yq
